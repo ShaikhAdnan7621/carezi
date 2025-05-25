@@ -33,7 +33,7 @@ function Header() {
 							Feed
 						</Link>
 						<Link
-							href="/professionals"
+							href="/professional"
 							className="text-black bg-green-50 shadow-inner shadow-green-50 hover:bg-green-100 focus:bg-green-100 group inline-flex h-9 w-max items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-green-100 data-[state=open]:bg-green-100 "
 						>
 							Professionals
@@ -88,7 +88,7 @@ function Header() {
 								Feed
 							</Link>
 							<Link
-								href="/professionals"
+								href="/professional"
 								className='block text-black bg-green-50 hover:bg-green-100 focus:bg-green-100 group  h-9 w-max items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-green-100 data-[state=open]:bg-green-100'
 
  							>

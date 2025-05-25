@@ -151,7 +151,7 @@ const EditIntro = ({ professionalData, update }) => {
 	};
 
 	return (
-		<div className="space-y-6 p-4">
+		<div className="flex flex-col space-y-6 p-4">
 			{/* Profile Summary */}
 			<div>
 				<h3 className="font-semibold">Profile Summary</h3>

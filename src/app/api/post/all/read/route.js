@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import textposts from '@/models/post/textpostmodles';
 import imageposts from '@/models/post/imagepostmodles';
-import articaposts from '@/models/post/articalpostmodles';
+import articaposts from '@/models/post/articlepostmodles';
 import questionposts from '@/models/post/questionpostmodles'; // Fix the import to match the correct variable name
 import users from '@/models/usermodles'; // Add this line to import the users model
 import { all } from 'axios';

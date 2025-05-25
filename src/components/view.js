@@ -21,14 +21,18 @@ const MarkdownView = ({ content }) => {
 			<style jsx global>
 				{`
 				.ql-editor {
-					min-height: 200px;
+					min-height: 200px; 
+					max-height: 800px;
+					height: 100%;
+					overflow-y: auto;
+					overflow-x: hidden;
 				}
-				.ql-container:{
-					border: none;
+				.ql-container:{ 
 				}
 				.markdown-view {
 					width: 100%;
-				}`}
+				}
+				`}
 			</style>
 		</div>
 	);

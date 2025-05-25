@@ -124,18 +124,16 @@ export default function ProfilePage() {
 								</div>
 								<div className='flex gap-4 pt-5 flex-wrap'>
 									<Badge variant={user.isEmailVerified ? "default" : "destructive"} >{user.isEmailVerified ? 'Email Verified' : 'Email Not Verified'}</Badge>
-									{user.accountLocked && <Badge variant="destructive">Account Locked</Badge>}
+									{user.accountLocked && <Badge variant="destructive"> </Badge>}
 									{user.isProfessional ? (<Button variant="secondary">Profession: {user.professionalApplication.professionType}</Button>)
 										: (user.professionalApplication ?
-											(
-												<>
-													<Button variant="secondary" className='capitalize'>Applyed For <span className='underline'>{user.professionalApplication.professionType}</span> Profession</Button>
-													<Badge
-														variant={user.professionalApplication.status === 'pending' ? 'warning' : user.professionalApplication.status === 'approved' ? 'success' : 'destructive'} >
-														{user.professionalApplication.status}
-													</Badge>
-												</>
-											)
+											<>
+												<Button variant="secondary" className='capitalize'>Applyed For <span className='underline'>{user.professionalApplication.professionType}</span> Profession</Button>
+												<Badge
+													variant={user.professionalApplication.status === 'pending' ? 'warning' : user.professionalApplication.status === 'approved' ? 'success' : 'destructive'} >
+													{user.professionalApplication.status}
+												</Badge>
+											</>
 											:
 											<Dialog>
 												<DialogTrigger className={cn(buttonVariants({ variant: "secondary" }))}>Be a Professional</DialogTrigger>
@@ -289,7 +287,6 @@ const ProfessionalSection = ({ props }) => {
 					<IntroSection professionalData={professionalData} updateProfessionalProfileData={updateProfessionalProfileData} />
 				</CardContent>
 			</Card >
-
 			<Card>
 				<CardContent>
 					<div className='grid grid-cols-1 xl:grid-cols-2	  h-full mt-6 gap-4'>
@@ -331,4 +328,4 @@ const ProfessionalSection = ({ props }) => {
 			</Card>
 		</div>
 	);
-};
+};	

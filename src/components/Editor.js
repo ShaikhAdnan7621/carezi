@@ -17,8 +17,8 @@ const Editor = ({ value, onChange }) => {
 
 	const modules = {
 		toolbar: [
-			[{ 'header': '1'}, {'header': '2'}, { 'font': [] }],
-			[{ 'list': 'ordered'}, { 'list': 'bullet' }],
+			[{ 'header': '1' }, { 'header': '2' }, { 'font': [] }],
+			[{ 'list': 'ordered' }, { 'list': 'bullet' }],
 			['bold', 'italic', 'underline'],
 			[{ 'color': [] }, { 'background': [] }],
 			[{ 'align': [] }],
@@ -28,7 +28,7 @@ const Editor = ({ value, onChange }) => {
 	};
 
 	return (
-		<div className='editor-wrapper w-full overflow-auto '>
+		<div className='editor-wrapper '>
 			<QuillNoSSRWrapper
 				value={value}
 				onChange={handleChange}
@@ -37,13 +37,15 @@ const Editor = ({ value, onChange }) => {
 					'header', 'font', 'list', 'bullet', 'bold', 'italic', 'underline',
 					'color', 'background', 'align', 'link', 'image'
 				]}
-				style={{ backgroundColor: '#fff', overflow : 'auto', maxHeight: '1000px' }}
+				style={{ backgroundColor: '#fff', overflow: 'auto', maxHeight: '1000px' }}
 			/>
 			<style jsx global>
 				{`
-				.ql-editor {
-					min-height: 200px;
-				}`}
+				.ql-editor { 
+				height: 100%;
+				}
+				
+				`}
 			</style>
 		</div>
 	);
