@@ -15,7 +15,7 @@ export async function middleware(request) {
 	const routes = {
 		public: ['/'],
 		auth: ['/auth/login', '/auth/signup', '/auth/verifyadmin'],
-		protected: ['/profile', '/settings', '/connections', '/admin', '/doctor', '/facility'],
+		protected: ['/profile', '/settings', '/connections', '/admin', '/doctor', '/facility', '/professional'],
 		api: ['/api'],
 		admin: ['/admin/'],
 		doctor: ['/doctor'],
@@ -89,6 +89,7 @@ export const config = {
 		'/auth/signup',
 		'/auth/verifyadmin',
 		'/profile',
+		'/professional/:path*',
 		'/doctor/:path*',
 		'/facility/:path*',
 		'/admin/:path*',

@@ -17,15 +17,34 @@ export async function POST(request) {
         if (!user) {
             return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
         }
+
+        // Validate image URL and caption
+        if (!imageUrl || !imageUrl.trim()) {
+            return NextResponse.json({ message: 'Image URL is required' }, { status: 400 });
+        }
+
+        if (caption && caption.length > 1000) {
+            return NextResponse.json({ message: 'Caption is too long' }, { status: 400 });
+        }
+
         const newPost = new imageposts({
             postBy: user.userId,
-            imageUrl,
-            caption,
+            imageUrl: imageUrl.trim(),
+            caption: caption ? caption.trim() : '',
+            createdAt: new Date()
         });
-        await newPost.save();
-        return NextResponse.json({ message: "Image post saved successfully" });
+
+        const savedPost = await newPost.save();
+        return NextResponse.json({ 
+            message: "Image posted successfully",
+            postId: savedPost._id 
+        }, { status: 201 });
+
     } catch (error) {
-        console.log(error.message);
-        return NextResponse.json({ message: error.message }, { status: 500 });
+        console.error("Error creating image post:", error);
+        return NextResponse.json({ 
+            message: 'Failed to create image post',
+            error: error.message 
+        }, { status: 500 });
     }
 }

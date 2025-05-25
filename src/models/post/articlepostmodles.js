@@ -12,4 +12,5 @@ const articlePostSchema = new mongoose.Schema({
 	},
 }, { timestamps: true });
 
-export default mongoose.models?.articleposts || mongoose.model("articleposts", articlePostSchema);
+export default mongoose.models?.articlePosts || mongoose.model("articlePosts", articlePostSchema);
+ 

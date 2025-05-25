@@ -1,15 +1,16 @@
-// src\components\feed\CreatPostFrom.js
 "use client"
 import React, { useState } from 'react'
 import { Button } from '../ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
 import { buttonVariants } from '../ui/button';
 import { cn } from '@/lib/utils';
-import { Edit, FileText, ImageIcon, LetterText, MessageCircleQuestion, Newspaper, Video } from 'lucide-react';
+import { Edit, FileText, ImageIcon, LetterText, MessageCircleQuestion, Newspaper, Video, Loader2 } from 'lucide-react';
 import { Input } from '../ui/input';
 import Editor from '../Editor';
 import axios from 'axios';
-
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
+import { textPostSchema, imagePostSchema, questionPostSchema, articlePostSchema } from '@/schemas/postSchemas';
 
 export default function CreatPostFromTriger() {
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -54,14 +55,26 @@ export default function CreatPostFromTriger() {
 						</DialogTrigger>
 					</div>
 				</div>
-				<DialogContent className='w-scree border h-screen lg:h-4/5 md:max-h-[90%] w-screen lg:w-4/5 lg:max-w-none flex flex-col '>
-					<DialogTitle>Create a {postType} post</DialogTitle>
+				<DialogContent className="max-h-[90vh] p-0 gap-0 w-[95vw] md:w-[85vw] lg:w-[75vw] xl:w-[65vw] max-w-[1200px]">
 					<CreatPostFrom postType={postType} setIsDialogOpen={setIsDialogOpen} />
 				</DialogContent>
 			</Dialog>
 		</div>
 	);
 }
+
+const PostLayout = ({ children, footer, isLoading }) => (
+	<div className='flex flex-col h-full'>
+		<div className='flex-1 overflow-auto p-6'>
+			{children}
+		</div>
+		<div className="sticky bottom-0 bg-background border-t">
+			<DialogFooter className="p-4">
+				{footer}
+			</DialogFooter>
+		</div>
+	</div>
+);
 
 const CreatPostFrom = (props) => {
 	const [postType, setPostType] = useState(props.postType);
@@ -71,118 +84,114 @@ const CreatPostFrom = (props) => {
 			case 'text':
 				return <TextPost setIsDialogOpen={props.setIsDialogOpen} />;
 			case 'image':
-				return <PostImage />;
+				return <PostImage setIsDialogOpen={props.setIsDialogOpen} />;
 			case 'question':
-				return <PostQuestion />;
+				return <PostQuestion setIsDialogOpen={props.setIsDialogOpen} />;
 			case 'article':
-				return <PostArticle />;
+				return <PostArticle setIsDialogOpen={props.setIsDialogOpen} />;
 			default:
 				return <TextPost setIsDialogOpen={props.setIsDialogOpen} />;
 		}
 	};
 
 	return (
-		<div className=''>
-			<div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-				<Button
-					variant={postType === 'text' ? 'primary' : 'secondary'}
-					onClick={() => setPostType('text')}
-					className="transition duration-300 ease-in-out transform hover:scale-105 active:scale-95 flex items-center gap-2"
-				>
-					<LetterText className="w-4 h-4" />
-					Text
-				</Button>
-				<Button
-					variant={postType === 'image' ? 'primary' : 'secondary'}
-					onClick={() => setPostType('image')}
-					className="transition duration-300 ease-in-out transform hover:scale-105 active:scale-95 flex items-center gap-2"
-				>
-					<ImageIcon className="w-4 h-4" />
-					Image
-				</Button>
-				<Button
-					variant={postType === 'question' ? 'primary' : 'secondary'}
-					onClick={() => setPostType('question')}
-					className="transition duration-300 ease-in-out transform hover:scale-105 active:scale-95 flex items-center gap-2"
-				>
-					<MessageCircleQuestion className="w-4 h-4" />
-					Question
-				</Button>
-				<Button
-					variant={postType === 'article' ? 'primary' : 'secondary'}
-					onClick={() => setPostType('article')}
-					className="transition duration-300 ease-in-out transform hover:scale-105 active:scale-95 flex items-center gap-2"
-				>
-					<FileText className="w-4 h-4" />
-					Article
-				</Button>
+		<div className='flex flex-col h-full max-h-[90vh]'>
+			<DialogHeader className="px-6 py-4 border-b sticky top-0 bg-background z-10">
+				<DialogTitle>Create {postType} Post</DialogTitle>
+				<DialogDescription>
+					Share your thoughts, images, or questions with the community
+				</DialogDescription>
+			</DialogHeader>
+
+			<div className="flex-1 overflow-auto">
+				<div className="p-4 md:p-6">
+					<div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 mb-4 place-items-center">
+						{[
+							{ type: 'text', icon: LetterText, label: 'Text' },
+							{ type: 'image', icon: ImageIcon, label: 'Image' },
+							{ type: 'question', icon: MessageCircleQuestion, label: 'Question' },
+							{ type: 'article', icon: FileText, label: 'Article' },
+						].map(({ type, icon: Icon, label }) => (
+							<Button
+								key={type}
+								variant={postType === type ? 'default' : 'outline'}
+								onClick={() => setPostType(type)}
+								className="w-full max-w-[200px] h-12 flex items-center justify-center gap-2"
+							>
+								<Icon className="h-5 w-5" />
+								<span>{label}</span>
+							</Button>
+						))}
+					</div>
+					<hr className="my-4" />
+					<div className="min-h-0 max-w-[1000px] mx-auto w-full">
+						{renderPostForm()}
+					</div>
+				</div>
 			</div>
-			<hr className='mb-6' />
-			{renderPostForm()}
 		</div>
 	);
 };
 
 const TextPost = ({ setIsDialogOpen }) => {
 	const [content, setContent] = useState('');
-	const [message, setMessage] = useState('');
+	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState('');
+	const router = useRouter();
 
 	const handleTextPost = async () => {
 		try {
-			const response = await axios.post("api/post/text/create", { content });
-			setMessage(response.data.message);
+			setIsLoading(true);
 			setError('');
-			setContent('');
-			setIsDialogOpen(false);
-		} catch (error) {
-			setError(error.message);
-			setMessage('');
+			
+			// Validate content
+			const validatedData = textPostSchema.parse({ content });
+			
+			const response = await axios.post("/api/post/text/create", validatedData);
+			
+			if (response.status === 201) {
+				toast.success('Post created successfully');
+				setIsDialogOpen(false);
+				router.refresh(); // Refresh the feed
+			}
+		} catch (err) {
+			if (err.name === 'ZodError') {
+				setError(err.errors[0].message);
+			} else {
+				setError(err.response?.data?.message || 'Failed to create post');
+				toast.error('Failed to create post');
+			}
+		} finally {
+			setIsLoading(false);
 		}
 	};
 
 	return (
-		<div>
-			<Editor value={content} onChange={(content) => { setContent(content) }} />
-			<Button className="mt-2" onClick={handleTextPost} >
-				Post
-			</Button>
-			{message && <p className="text-green-500 mt-2">{message}</p>}
-			{error && <p className="text-red-500 mt-2">{error}</p>}
-		</div>
+		<PostLayout
+			footer={
+				<div className="flex items-center justify-between w-full gap-4">
+					<div className="text-sm text-red-500 flex-1">{error}</div>
+					<Button onClick={handleTextPost} disabled={isLoading}>
+						{isLoading ? 'Posting...' : 'Post'}
+					</Button>
+				</div>
+			}
+		>
+			<div className="min-h-[200px] max-w-[900px] mx-auto w-full">
+				<Editor value={content} onChange={setContent} />
+			</div>
+		</PostLayout>
 	);
 };
 
-
-
-const PostQuestion = () => {
-	const [question, setQuestion] = useState('');
-	const handleQuestionPost = async () => {
-		const questionData = { question };
-		try {
-			const response = await axios.post('/api/post/question/create/', questionData);
-			console.log(response.data.message);
-			setQuestion('');
-		}
-		catch (error) {
-			console.error('Error posting question:', error);
-		}
-	}
-	return (
-		<div>
-			<Editor value={question} onChange={setQuestion} />
-			<Button className="mt-2" onClick={handleQuestionPost} >Post Question</Button>
-		</div>
-	);
-};
-
-
-
-const PostImage = () => {
+const PostImage = ({ setIsDialogOpen }) => {
 	const [imagePreview, setImagePreview] = useState(null);
 	const [imageFile, setImageFile] = useState(null);
 	const [showEditor, setShowEditor] = useState(false);
 	const [caption, setCaption] = useState('');
+	const [isLoading, setIsLoading] = useState(false);
+	const [error, setError] = useState('');
+	const router = useRouter();
 
 	const handleNextClick = () => {
 		setShowEditor(true);
@@ -202,84 +211,196 @@ const PostImage = () => {
 
 	const handleImagePost = async () => {
 		try {
+			setIsLoading(true);
+			if (!imageFile) {
+				throw new Error('Please select an image');
+			}
+
+			// Upload image
 			const formData = new FormData();
 			formData.append("file", imageFile);
-			formData.append("folder", "post_images"); // You can change the folder name if needed
+			formData.append("folder", "post_images");
+			
 			const uploadRes = await axios.post("/api/uploadimage", formData);
 			const imageUrl = uploadRes.data.url;
- 			const response = await axios.post("/api/post/image/create", { imageUrl, caption });
-			console.log(response.data.message);
- 		} catch (error) {
-			console.log(error.message);
+
+			// Validate post data
+			const postData = { imageUrl, caption };
+			const validatedData = imagePostSchema.parse(postData);
+
+			// Create post
+			const response = await axios.post("/api/post/image/create", validatedData);
+			
+			if (response.status === 201) {
+				toast.success('Image posted successfully');
+				setIsDialogOpen(false);
+				router.refresh();
+			}
+		} catch (err) {
+			if (err.name === 'ZodError') {
+				setError(err.errors[0].message);
+			} else {
+				setError(err.response?.data?.message || 'Failed to upload image');
+				toast.error('Failed to upload image');
+			}
+		} finally {
+			setIsLoading(false);
 		}
 	};
 
 	return (
-		<div className='overflow-auto'>
+		<PostLayout
+			footer={
+				<div className="flex justify-end gap-2">
+					{showEditor && <Button variant="outline" onClick={handlePreviousClick}>Back</Button>}
+					{imagePreview && !showEditor && <Button onClick={handleNextClick}>Add Caption</Button>}
+					{showEditor && <Button onClick={handleImagePost}>Post Image</Button>}
+				</div>
+			}
+		>
 			{!showEditor ? (
-				<>
-					<input
-						type="file"
-						accept="image/*"
-						onChange={handleImageUpload}
-						className="w-full p-2 border rounded-md mb-4"
-					/>
-					{imagePreview && (
-						<>
-							<div className='overflow-auto h-64 w-full'>
-								<img src={imagePreview} alt="Preview" className="mt-2 mx-auto h-auto rounded-md w-64" />
-							</div>
-							<div className="flex justify-end mt-2">
-								<button onClick={handleNextClick}>Next</button>
-							</div>
-						</>
-					)}
-				</>
-			) : (
-				<>
-					<Editor value={caption} onChange={setCaption} />
-					<div className="flex justify-between mt-2">
-						<button onClick={handlePreviousClick}>Previous</button>
-						<button onClick={handleImagePost}>Post Image</button>
+				<div className="space-y-4">
+					<div className="grid w-full max-w-sm items-center gap-1.5">
+						<Input
+							type="file"
+							accept="image/*"
+							onChange={handleImageUpload}
+							className="cursor-pointer"
+						/>
 					</div>
-				</>
+					{imagePreview && (
+						<div className="relative aspect-video rounded-lg overflow-hidden">
+							<img
+								src={imagePreview}
+								alt="Preview"
+								className="object-cover w-full h-full"
+							/>
+						</div>
+					)}
+				</div>
+			) : (
+				<Editor value={caption} onChange={setCaption} />
 			)}
-		</div>
+		</PostLayout>
 	);
 };
 
+const PostQuestion = ({ setIsDialogOpen }) => {
+	const [question, setQuestion] = useState('');
+	const [isLoading, setIsLoading] = useState(false);
+	const [error, setError] = useState('');
+	const router = useRouter();
 
+	const handleQuestionPost = async () => {
+		try {
+			setIsLoading(true);
+			setError('');
 
+			// Validate question
+			const validatedData = questionPostSchema.parse({ question });
 
-const PostArticle = () => {
+			const response = await axios.post('/api/post/question/create', validatedData);
+			
+			if (response.status === 201) {
+				toast.success('Question posted successfully');
+				setIsDialogOpen(false);
+				router.refresh();
+			}
+		} catch (err) {
+			if (err.name === 'ZodError') {
+				setError(err.errors[0].message);
+			} else {
+				setError(err.response?.data?.message || 'Failed to post question');
+				toast.error('Failed to post question');
+			}
+		} finally {
+			setIsLoading(false);
+		}
+	};
+
+	return (
+		<PostLayout
+			footer={
+				<div className="flex items-center justify-between w-full">
+					<div className="text-sm text-red-500">{error}</div>
+					<Button onClick={handleQuestionPost} disabled={isLoading}>
+						{isLoading ? 'Posting...' : 'Post Question'}
+					</Button>
+				</div>
+			}
+		>
+			<Editor value={question} onChange={setQuestion} />
+		</PostLayout>
+	);
+};
+
+const PostArticle = ({ setIsDialogOpen }) => {
 	const [title, setTitle] = useState('');
 	const [content, setContent] = useState('');
-
+	const [isLoading, setIsLoading] = useState(false);
+	const [error, setError] = useState('');
+	const router = useRouter();
 
 	const handleArticlePost = async () => {
-		const articleData = {
-			title,
-			content,
-		};
 		try {
-			const response = await axios.post('/api/post/article/create', articleData);
-			console.log(response.data.message);
-			setTitle('');
-			setContent('');
-		} catch (error) {
-			console.error('Error posting article:', error);
+			setIsLoading(true);
+			setError('');
+
+			// Validate article data
+			const validatedData = articlePostSchema.parse({ title, content });
+
+			const response = await axios.post('/api/post/article/create', validatedData);
+			
+			if (response.status === 201) {
+				toast.success('Article posted successfully');
+				setIsDialogOpen(false);
+				router.refresh();
+			}
+		} catch (err) {
+			if (err.name === 'ZodError') {
+				setError(err.errors[0].message);
+			} else {
+				setError(err.response?.data?.message || 'Failed to post article');
+				toast.error('Failed to post article');
+			}
+		} finally {
+			setIsLoading(false);
 		}
-	}
+	};
+
 	return (
-		<div>
+		<PostLayout
+			footer={
+				<div className="flex items-center justify-between w-full">
+					<div className="text-sm text-red-500">{error}</div>
+					<Button onClick={handleArticlePost} disabled={isLoading}>
+						{isLoading ? (
+							<>
+								<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+								Posting...
+							</>
+						) : (
+							'Post Article'
+						)}
+					</Button>
+				</div>
+			}
+		>
 			<Input
 				placeholder="Article Title"
 				value={title}
 				onChange={(e) => setTitle(e.target.value)}
 				className="w-full p-2 border rounded-md mb-4"
+				disabled={isLoading}
 			/>
-			<Editor value={content} onChange={setContent} />
-			<Button className="mt-2">Post Article</Button>
-		</div>
+			<div className={`relative ${isLoading ? 'opacity-50' : ''}`}>
+				<Editor value={content} onChange={setContent} />
+				{isLoading && (
+					<div className="absolute inset-0 flex items-center justify-center bg-background/50">
+						<Loader2 className="h-8 w-8 animate-spin" />
+					</div>
+				)}
+			</div>
+		</PostLayout>
 	);
 };
