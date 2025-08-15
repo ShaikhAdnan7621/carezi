@@ -20,7 +20,6 @@ export default function RootLayout({ children }) {
 		<html lang="en" suppressHydrationWarning>
 			<body className={`${inter.className} bg-green-50 antialiased`}>
 				<Navbar />
-
 				<main className="lg:max-w-[80%] px-4 mx-auto">
 					{children}
 				</main>
