@@ -434,8 +434,8 @@ export default function HomePage() {
 								/>
 							</div>
 							<blockquote className="text-lg text-green-800 italic leading-relaxed max-w-2xl mx-auto">
-								"Carezi has revolutionized how I connect with colleagues. The platform's focus on healthcare
-								professionals creates meaningful connections that directly impact patient care."
+								{"Carezi has revolutionized how I connect with colleagues. The platform's focus on healthcare"}
+								{'professionals creates meaningful connections that directly impact patient care."'}
 							</blockquote>
 							<div>
 								<div className="font-bold text-green-800">Dr. Maria Rodriguez</div>
