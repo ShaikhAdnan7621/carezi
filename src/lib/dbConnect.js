@@ -1,3 +1,5 @@
+// src\lib\dbConnect.js
+
 // db connect
 import mongoose from 'mongoose';
 

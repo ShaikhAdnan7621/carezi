@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input'
 import axios from 'axios'
 import React, { useState } from 'react'
 
-export default function page() {
+export default function VerifyAdmin() {
 	const [adminPassword, setAdminPassword] = useState('')
 	const [error, seterror] = useState('')
 	return (
@@ -20,21 +20,21 @@ export default function page() {
 						{/* Add your admin verification form here */}
 						<Input type="password" placeholder="Enter Admin Password" onChange={(e) => { setAdminPassword(e.target.value) }} />
 						<Button className='w-full'
-							onClick={() => {
+							onClick={async () => {
 								try {
-									// make a axios requesti to add aa cookies and send data to verify admin i want to send this password 
 									console.log("Verifying admin password...");
 									if (!adminPassword) {
 										seterror('Admin Password is required');
 										return;
 									}
-									const responce = axios.post('/api/admin/verify', { adminPassword });
-									if (responce.status === 200) {
+									const response = await axios.post('/api/admin/verify', { adminPassword });
+									if (response.data.message === 'Admin Verified') {
 										console.log("Admin password verified");
 										window.location.href = '/admin';
 									}
 								} catch (error) {
 									console.error("Error verifying admin password:", error);
+									seterror(error.response?.data?.message || 'Verification failed');
 								}
 							}}
 

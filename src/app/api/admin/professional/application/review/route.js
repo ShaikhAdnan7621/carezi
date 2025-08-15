@@ -4,12 +4,14 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import users from '@/models/usermodles';
 import professionals from '@/models/professionalmodles'
+import { cookies } from 'next/headers';
 
 export async function POST(request) {
 	try {
 		await dbConnect();
 		const { userId, approved } = await request.json();
-		const adminToken = request.cookies.get('adminToken')?.value;
+		const cookieStore = cookies();
+		const adminToken = cookieStore.get('adminToken')?.value;
 		if (!adminToken) {
 			return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
 		}

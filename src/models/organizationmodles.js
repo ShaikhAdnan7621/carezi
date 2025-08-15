@@ -23,8 +23,8 @@ const contactDetailsSchema = new mongoose.Schema({
 	},
 });
 
-// Availability Sub-Schema
-const availabilitySchema = new mongoose.Schema({
+// Organization Hours Sub-Schema (consistent with professional consultation schema)
+const organizationHoursSchema = new mongoose.Schema({
 	day: {
 		type: String,
 		enum: [
@@ -38,8 +38,17 @@ const availabilitySchema = new mongoose.Schema({
 		],
 		required: true,
 	},
-	startTime: { type: String, required: true },
-	endTime: { type: String, required: true },
+	isOpen: { type: Boolean, default: false },
+	morning: {
+		startTime: { type: String, default: "09:00" },
+		endTime: { type: String, default: "12:00" },
+		isActive: { type: Boolean, default: false }
+	},
+	evening: {
+		startTime: { type: String, default: "14:00" },
+		endTime: { type: String, default: "17:00" },
+		isActive: { type: Boolean, default: false }
+	}
 });
 
 // Services Offered Sub-Schema
@@ -70,43 +79,7 @@ const departmentSchema = new mongoose.Schema({
 	specialities: [{ type: String }], // Array of specialties
 });
 
-// Professionals Sub-Schema
-const professionalSchema = new mongoose.Schema({
-	professionalId: {
-		type: mongoose.Schema.Types.ObjectId,
-		ref: "professionals",
-		required: true,
-	},
-	name: { type: String, required: true },
-	speciality: { type: String, required: true },
-	profilePic: { type: String },
-});
 
-// Past Professionals Sub-Schema
-const pastProfessionalSchema = new mongoose.Schema({
-	professionalId: {
-		type: mongoose.Schema.Types.ObjectId,
-		ref: "professionals",
-		required: true,
-	},
-	name: { type: String, required: true },
-	speciality: { type: String, required: true },
-	startDate: { type: Date, required: true },
-	endDate: { type: Date },
-});
-
-// Current Professionals Sub-Schema
-const currentProfessionalSchema = new mongoose.Schema({
-	professionalId: {
-		type: mongoose.Schema.Types.ObjectId,
-		ref: "professionals",
-		required: true,
-	},
-	name: { type: String, required: true },
-	speciality: { type: String, required: true },
-	startDate: { type: Date, required: true },
-	endDate: { type: Date },
-});
 
 // --- Main Facility Schema ---
 const organizationSchema = new mongoose.Schema(
@@ -115,6 +88,11 @@ const organizationSchema = new mongoose.Schema(
 			type: mongoose.Schema.Types.ObjectId,
 			ref: "users",
 			required: true,
+		},
+		status: {
+			type: String,
+			enum: ['pending', 'approved', 'rejected'],
+			default: 'pending'
 		},
 		name: { type: String, required: true },
 		facilityType: {
@@ -135,13 +113,12 @@ const organizationSchema = new mongoose.Schema(
 			headline: { type: String },
 		},
 		contactDetails: contactDetailsSchema,
-		availability: [availabilitySchema],
+		operatingHours: [organizationHoursSchema],
 		services: [serviceSchema],
 		amenities: [amenitySchema],
 		facilities: [facilityDetailsSchema],
 		departments: [departmentSchema],
-		currentProfessionals: [currentProfessionalSchema],
-		pastProfessionals: [pastProfessionalSchema],
+
 		verificationDocuments: [String],
 		rejectionReason: { type: String },
 		isProfileActive: { type: Boolean, default: false },
@@ -150,3 +127,4 @@ const organizationSchema = new mongoose.Schema(
 );
 
 export default mongoose.models.organizations || mongoose.model("organizations", organizationSchema);
+

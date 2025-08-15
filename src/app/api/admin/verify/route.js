@@ -16,8 +16,7 @@ export async function POST(request) {
 		if (!body.adminPassword) {
 			return NextResponse.json({ message: 'Admin Password is required' }, { status: 400 });
 		}
-		
-		console.log("debug 1✅", body.adminPassword)
+
 
 		// get information form token 
 		const accessToken = request.cookies.get('accessToken')?.value;
@@ -32,13 +31,28 @@ export async function POST(request) {
 		}
 		const admin = await users.findOne({ _id: user.userId });
 		if (!admin) {
-			return NextResponse.json({ message: 'Admin not found' }, { status: 404 });
+			return NextResponse.json({ message: 'User not found' }, { status: 404 });
 		}
+
+
+		if (!admin.adminpass) {
+			return NextResponse.json({ message: 'Admin password not set' }, { status: 401 });
+		}
+ 
 		const isValidPassword = await comparePassword(body.adminPassword, admin.adminpass);
+
+		console.log("Is Valid Password:", isValidPassword);
 		if (!isValidPassword) {
-			return NextResponse.json({ message: 'Incorrect Password' }, { status: 401 });
+			return NextResponse.json({ message: 'Invalid admin password' }, { status: 401 });
 		}
-		console.log("routed hitted here ✅✅")
+
+		// Update user to be admin if not already
+		if (!admin.isAdmin) {
+			await users.updateOne(
+				{ _id: admin._id },
+				{ $set: { isAdmin: true } }
+			);
+		}
 
 		const adminToken = await generateToken({ userId: admin._id, email: admin.email, isAdmin: true }, { expiresIn: '1d' });
 		const response = NextResponse.json({ message: 'Admin Verified' }, { status: 200 });

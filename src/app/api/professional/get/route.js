@@ -1,26 +1,25 @@
-// src\app\api\professional\get\route.js
 
+// src\app\api\professional\get\route.js
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
-import bcConnect from '@/lib/dbConnect';
+import dbConnect from '@/lib/dbConnect';
 import { getUserFromCookies } from '@/utils/getUserFromCookies';
 import professionals from '@/models/professionalmodles';
+import users from "@/models/usermodles";
 
 
 export async function GET(request) {
 	try {
-
-		console.log("professional\get hitted here")
-		await bcConnect();
+		await dbConnect();
 		const { userId } = await getUserFromCookies(request);
 		if (!userId) {
 			return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
 		}
 
-		const professional = await professionals.findOne({ userId });
+		const professional = await professionals.findOne({  userId }).populate('userId');
 		if (!professional) {
 			return NextResponse.json({ message: 'Professional not found' }, { status: 404 });
-		}
-		console.log(professional);
+		} 
 		return NextResponse.json({ message: 'Professional found', professional }, { status: 200 });
 
 	} catch (error) {
