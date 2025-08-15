@@ -1,3 +1,5 @@
+// src\lib\cloudinary.js
+
 import cloudinary from 'cloudinary';
 import sharp from 'sharp';
 

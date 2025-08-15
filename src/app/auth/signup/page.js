@@ -1,4 +1,3 @@
-// src\app\auth\signup\page.js
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -6,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import axios from "axios";
-import { z } from "zod"; 
+import { z } from "zod";
+import { ChevronRight } from "lucide-react";
 
 const signupUserSchema = z.object({
 	name: z.string()
@@ -28,30 +28,30 @@ export default function Signup() {
 	const [password, setPassword] = useState("");
 	const [name, setName] = useState("");
 	const [error, setError] = useState(null);
+	const [loading, setLoading] = useState(false); // Loading state
 	const router = useRouter();
 
 	const handleSignup = async () => {
+		setLoading(true); // Start loading
+		setError(null);   // Clear previous errors
 		try {
-			setError(null); // Clear any previous errors
 			const userData = { name, email, password };
 			const validatedData = signupUserSchema.parse(userData);
 			const res = await axios.post("/api/auth/signup", validatedData);
-
- 			router.push('/auth/login');
-
+			router.push('/auth/login');
 		} catch (error) {
 			if (error instanceof z.ZodError) {
- 				setError(error.errors[0].message);
+				setError(error.errors[0].message);
 			} else if (axios.isAxiosError(error)) {
- 				const errorMessage = error.response?.data?.error || 'Failed to sign up';
+				const errorMessage = error.response?.data?.error || 'Failed to sign up';
 				setError(errorMessage);
 			} else {
- 				setError('An unexpected error occurred');
+				setError('An unexpected error occurred');
 			}
+		} finally {
+			setLoading(false); // Stop loading
 		}
 	};
-
-
 
 	return (
 		<div className="flex flex-col items-center justify-center min-h-screen py-2">
@@ -63,52 +63,41 @@ export default function Signup() {
 						placeholder="Name"
 						value={name}
 						onChange={(e) => setName(e.target.value)}
+						disabled={loading}
 					/>
 					<Input
 						type="email"
 						placeholder="Email"
 						value={email}
 						onChange={(e) => setEmail(e.target.value)}
+						disabled={loading}
 					/>
 					<Input
 						type="password"
 						placeholder="Password"
 						value={password}
 						onChange={(e) => setPassword(e.target.value)}
+						disabled={loading}
 					/>
-					<Button onClick={handleSignup}>Sign Up</Button>
+					<Button onClick={handleSignup} disabled={loading}>
+						{loading ? (
+							<div className="flex items-center gap-2">
+								<div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white"></div>
+								Signing up...
+							</div>
+						) : (
+							"Sign Up"
+						)}
+					</Button>
 				</div>
 				{error && <p className="text-red-500 mt-4">{error}</p>}
 
 				<div className="mt-6 text-center">
 					<p className="text-sm text-gray-600">
-						Already have an account?{" "}
-						<Link
-							href="'/auth/login'"
-							className="font-semibold text-primary hover:text-primary/80 inline-flex items-center gap-1 transition-colors"
-						>
-							Login here
-							<svg
-								xmlns="http://www.w3.org/2000/svg"
-								width="16"
-								height="16"
-								viewBox="0 0 24 24"
-								fill="none"
-								stroke="currentColor"
-								strokeWidth="2"
-								strokeLinecap="round"
-								strokeLinejoin="round"
-								className="h-4 w-4"
-							>
-								<path d="m9 18 6-6-6-6" />
-							</svg>
-						</Link>
+						Already have an account?{" "} <Link href="/auth/login"> Login here </Link>
 					</p>
 				</div>
-
 			</div>
-		</div >
+		</div>
 	);
 }
-
-

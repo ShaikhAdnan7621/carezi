@@ -15,15 +15,18 @@ export async function middleware(request) {
 	const routes = {
 		public: ['/'],
 		auth: ['/auth/login', '/auth/signup', '/auth/verifyadmin'],
-		protected: ['/profile', '/settings', '/connections', '/admin', '/doctor', '/facility', '/professional'],
+		logout: ['/auth/logout'],
+		protected: ['/profile', '/settings', '/connections', '/admin', '/cear', '/professional', '/organizations'],
 		api: ['/api'],
 		admin: ['/admin/'],
-		doctor: ['/doctor'],
-		facility: ['/facility'],
+		professional: ['/professional'],
+		organizations: ['/organizations'],
+		cear: ['/cear'],
 	};
 
 	const isProtected = routes.protected.some(route => pathname.startsWith(route));
 	const isAuth = routes.auth.some(route => pathname === route);
+	const isLogout = routes.logout.some(route => pathname === route);
 	const isPublic = routes.public.some(route => pathname === route);
 	const isApiRoute = routes.api.some(route => pathname.startsWith(route));
 	const isAdminRoute = routes.admin.some(route => pathname.startsWith(route));
@@ -74,6 +77,11 @@ export async function middleware(request) {
 		return NextResponse.next();
 	}
 
+	if (isLogout) {
+		console.log("User is on logout route. \n-------------------------------------");
+		return NextResponse.next();
+	}
+
 	if (isPublic) {
 		console.log("User is on public route. \n-------------------------------------");
 		return NextResponse.next();
@@ -87,12 +95,14 @@ export const config = {
 		'/',
 		'/auth/login',
 		'/auth/signup',
+		'/auth/logout',
 		'/auth/verifyadmin',
 		'/profile',
 		'/professional/:path*',
-		'/doctor/:path*',
-		'/facility/:path*',
+		'/organizations/:path*',
 		'/admin/:path*',
+		'/cear',
+		'/cear/:path*',
 		'/api'
 	],
 };

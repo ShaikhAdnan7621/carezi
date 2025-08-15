@@ -23,12 +23,22 @@ const skillSchema = new mongoose.Schema({
 
 // Experience Sub-Schema
 const experienceSchema = new mongoose.Schema({
-	organization: { type: String, required: true },
-	role: { type: String, required: true },
-	department: { type: String },
-	startDate: { type: Date, required: true },
-	endDate: { type: Date },
-	isCurrent: { type: Boolean, default: false },
+  organization: { type: String, required: true },
+  organizationId: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'Organization',
+    required: false 
+  },
+  isManualEntry: { 
+    type: Boolean, 
+    default: true 
+  },
+  role: { type: String, required: true },
+  department: String,
+  startDate: Date,
+  endDate: Date,
+  isCurrent: Boolean,
+  description: String
 });
 
 // Certification Sub-Schema
@@ -72,8 +82,17 @@ const consultationSchema = new mongoose.Schema({
 					"sunday",
 				],
 			},
-			startTime: { type: String },
-			endTime: { type: String },
+			isAvailable: { type: Boolean, default: false },
+			morning: {
+				startTime: { type: String, default: "09:00" },
+				endTime: { type: String, default: "12:00" },
+				isActive: { type: Boolean, default: false }
+			},
+			evening: {
+				startTime: { type: String, default: "14:00" },
+				endTime: { type: String, default: "17:00" },
+				isActive: { type: Boolean, default: false }
+			}
 		},
 	],
 	fee: {
@@ -133,3 +152,4 @@ const professionalsSchema = new mongoose.Schema(
 );
 
 export default mongoose.models.professionals || mongoose.model("professionals", professionalsSchema);
+
